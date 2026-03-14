@@ -41,14 +41,14 @@ export default function Home() {
           />
         </div>
 
-        {/* Ground — thinner on mobile (28%), less zoomed feel */}
+        {/* Ground — full width, bottom section */}
         <div
-          className="pointer-events-none absolute left-0 top-[72%] h-[28%] w-full overflow-hidden md:top-[80%] md:h-[20%]"
+          className="pointer-events-none absolute left-0 top-[66.76%] h-[33.24%] w-full overflow-hidden"
           aria-hidden
         >
           <img
             alt=""
-            className="absolute inset-0 size-full object-cover object-top [object-position:50%_15%] md:[object-position:50%_15%] md:h-[2%]"
+            className="absolute inset-0 size-full object-cover object-top [object-position:50%_22%]"
             src={IMG_GROUND}
           />
         </div>
@@ -73,9 +73,9 @@ export default function Home() {
           />
         </div>
 
-        {/* Right dog — pull left on mobile so visible in portrait */}
+        {/* Right dog — centre-right on mobile, fully on screen */}
         <div
-          className="pointer-events-none absolute left-[56%] top-[45%] h-[37.5%] w-[21.09%] overflow-hidden md:left-[67.5%]"
+          className="pointer-events-none absolute left-[52%] top-[45%] h-[37.5%] w-[21.09%] overflow-hidden md:left-[67.5%]"
           aria-hidden
         >
           <img
@@ -85,14 +85,14 @@ export default function Home() {
           />
         </div>
 
-        {/* Tree — well left on mobile so full tree visible, no cutoff */}
+        {/* Tree — centre-left on mobile; desktop position unchanged */}
         <div
-          className="pointer-events-none absolute left-[42%] top-[30.5%] h-[37.5%] w-[24%] overflow-visible md:left-[77.5%] md:w-[21.09%]"
+          className="pointer-events-none absolute left-[32%] top-[30.5%] h-[37.5%] w-[24%] overflow-visible md:left-[77.5%] md:w-[21.09%]"
           aria-hidden
         >
           <img
             alt=""
-            className="absolute bottom-0 left-1/2 size-[130%] -translate-x-1/2 object-contain object-bottom md:size-[150%]"
+            className="absolute bottom-0 left-1/2 size-[100%] -translate-x-1/2 object-contain object-bottom md:size-[150%]"
             src={IMG_TREE}
           />
         </div>
