@@ -40,7 +40,6 @@ export default function Home() {
         <SceneBackground>
           <div className="pointer-events-none fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-transparent">
             <div className="pointer-events-none relative size-full flex-shrink-0 overflow-hidden">
-
               <motion.div
                 initial={{ y: 200, x: 0 }}
                 animate={{
@@ -126,7 +125,6 @@ export default function Home() {
                   <path d="M40 26 L40 74 L74 50 Z" fill={PLAY_TRIANGLE_FILL} />
                 </svg>
               </Link>
-
             </div>
           </div>
         </SceneBackground>
