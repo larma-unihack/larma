@@ -7,6 +7,8 @@ import { useAlarmStatus } from "@/hooks/useAlarmStatus";
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
 const IMG_DOG = "/images/dog_sitting.png";
+const IMG_HEART = "/images/heart.gif";
+const IMG_SLEEP = "/images/sleep.gif";
 const IMG_SQUARE = "/images/home_page_square.png";
 const IMG_RECTANGLE = "/images/home_page_rectangle.png";
 
@@ -28,6 +30,8 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
   const { alarmSet, alarmTime, phone, loading, health } = useAlarmStatus();
   const showSquareContent = !loading && !alarmSet;
   const leftPanelImage = loading || !alarmSet ? IMG_SQUARE : IMG_RECTANGLE;
+  const showHearts = health != null && health >= 50;
+  const showSleep = health != null && health < 50;
 
   return (
     <SceneBackground>
@@ -108,9 +112,37 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           <div className="relative h-[65%] w-full mt-[-5%]">
             <img
               alt="Dog"
-              className="size-full object-contain object-bottom"
+              className="relative z-10 size-full object-contain object-bottom"
               src={IMG_DOG}
             />
+            {showHearts && (
+              <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center" aria-hidden>
+                <img
+                  alt=""
+                  className="absolute top-[20%] left-1/2 h-[10%] min-h-[28px] w-auto -translate-x-1/2 object-contain md:top-[22%] md:h-[12%]"
+                  src={IMG_HEART}
+                />
+                <img
+                  alt=""
+                  className="absolute top-[24%] left-[22%] h-[9%] min-h-[24px] w-auto object-contain md:top-[26%] md:left-[28%] md:h-[11%]"
+                  src={IMG_HEART}
+                />
+                <img
+                  alt=""
+                  className="absolute top-[24%] right-[22%] h-[9%] min-h-[24px] w-auto object-contain md:top-[26%] md:right-[28%] md:h-[11%]"
+                  src={IMG_HEART}
+                />
+              </div>
+            )}
+            {showSleep && (
+              <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center" aria-hidden>
+                <img
+                  alt=""
+                  className="absolute top-[18%] left-1/2 h-[14%] min-h-[36px] w-auto -translate-x-1/2 object-contain md:top-[20%] md:h-[16%]"
+                  src={IMG_SLEEP}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
