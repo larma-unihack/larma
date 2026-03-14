@@ -22,7 +22,7 @@ export default function OpeningPage() {
       <div className="opening-page__canvas relative flex-shrink-0 overflow-hidden">
         {/* Sky — more height on mobile so ground feels less dominant */}
         <div
-          className="pointer-events-none absolute left-0 top-0 h-[72%] w-full overflow-hidden opacity-90 shadow-[0px_4px_200px_0px_rgba(0,0,0,0.15)] md:h-[66.76%]"
+          className="pointer-events-none absolute left-0 top-0 h-[72%] w-full overflow-hidden opacity-90 shadow-[0px_4px_200px_0px_rgba(0,0,0,0.15)] md:h-[66.76%] z-0"
           aria-hidden
         >
           
@@ -35,7 +35,7 @@ export default function OpeningPage() {
 
          {/* Left dog — nudge right on mobile so not cut off by portrait crop */}
         <div
-          className="pointer-events-none absolute left-[4%] top-[33.43%] h-[37.5%] w-[21.09%] overflow-hidden md:left-0"
+          className="pointer-events-none absolute left-[4%] top-[33.43%] h-[37.5%] w-[21.09%] md:left-0"
           aria-hidden
         >
           <motion.div 
@@ -45,7 +45,7 @@ export default function OpeningPage() {
           >
             <img
               alt=""
-              className="inset-0 size-full scale-x-[-1] object-contain object-bottom z-index-0"
+              className="scale-x-[-1] z-1"
               src={IMG_DOGS}
             />
           </motion.div>
@@ -60,7 +60,7 @@ export default function OpeningPage() {
         >
           <img
             alt=""
-            className="absolute inset-0 size-full max-w-none object-cover object-bottom"
+            className="size-full max-w-none object-bottom z-0"
             src={IMG_MOUNTAIN}
           />
         </div>
