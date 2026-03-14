@@ -25,6 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [openLoginModal, setOpenLoginModal] = useState(false);
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);

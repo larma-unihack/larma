@@ -21,6 +21,10 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth) {
+      setError("Auth is not configured");
+      return;
+    }
     setError(null);
     setBusy(true);
     try {

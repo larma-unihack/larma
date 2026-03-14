@@ -11,11 +11,26 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-function getFirebaseApp(): FirebaseApp {
+function hasConfig(): boolean {
+  return Boolean(
+    firebaseConfig.apiKey &&
+      firebaseConfig.projectId &&
+      firebaseConfig.appId
+  );
+}
+
+let _app: FirebaseApp | null = null;
+function getFirebaseApp(): FirebaseApp | null {
+  if (!hasConfig()) return null;
+  if (_app) return _app;
   const existing = getApps()[0];
-  if (existing) return existing;
-  return initializeApp(firebaseConfig);
+  if (existing) {
+    _app = existing;
+    return _app;
+  }
+  _app = initializeApp(firebaseConfig);
+  return _app;
 }
 
 const app = getFirebaseApp();
-export const auth: Auth = getAuth(app);
+export const auth: Auth | null = app ? getAuth(app) : null;
