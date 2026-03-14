@@ -39,7 +39,9 @@
 		"region": "gcp:australia-southeast1"
 	},
 	"triggers": {
-		"crons": ["0 * * * *"]
+		"crons": [
+			"* * * * *"
+		]
 	},
 	"r2_buckets": [
 		// Use R2 incremental cache

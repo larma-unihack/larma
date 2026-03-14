@@ -7,7 +7,6 @@ import Hamburger from "@/components/Hamburger";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { scheduleCall } from "@/lib/bland-api";
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
 const IMG_DOG = "/images/dog_sitting.png";
@@ -97,16 +96,10 @@ export default function SetAlarmTimePage() {
         targetDate.setDate(targetDate.getDate() + 1);
       }
 
-      const previousCallId = userDoc.data()?.blandCallId;
-      const result = await scheduleCall(phone, targetDate, previousCallId);
-
-      if (!result?.call_id) {
-        throw new Error("Received empty call_id from Bland AI");
-      }
-
       await updateDoc(doc(db, "users", user.uid), {
-        alarmTime: targetDate.toISOString(),
-        blandCallId: result.call_id
+        time: { hours, minutes },
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        nextAlarmTime: targetDate.toISOString()
       });
 
       router.push("/home-page");

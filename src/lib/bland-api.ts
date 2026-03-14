@@ -1,4 +1,4 @@
-export async function scheduleCall(phoneNumber: string, date?: Date, previousCallId?: string) {
+export async function scheduleCall(phoneNumber: string, date?: Date) {
   try {
     let finalDate = date;
 
@@ -19,11 +19,7 @@ export async function scheduleCall(phoneNumber: string, date?: Date, previousCal
     if (finalDate) {
       payload.startTime = finalDate.toISOString();
     }
-    if (previousCallId) {
-      payload.previousCallId = previousCallId;
-    }
-
-    const response = await fetch("/blandai", {
+    const response = await fetch("/api/call", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
