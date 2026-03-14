@@ -19,7 +19,10 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
 
   return (
     <SceneBackground>
-      <div className="relative min-h-screen w-full overflow-hidden">
+      {/* CHANGED: Changed min-h-screen to min-h-dvh for better mobile support.
+        CHANGED: Added absolute inset-0 to pin the UI layer exactly to the background.
+      */}
+      <div className="absolute inset-0 flex flex-col overflow-hidden min-h-dvh w-full">
         {hasStarted && <Hamburger />}
 
         {/* 1. LEFT DATA SQUARE */}
@@ -49,10 +52,7 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           </div>
         </div>
 
-        {/* 2. BUNDLED DOG & HEALTH 
-            - Raised bottom to [28%] to make the dog sit higher in the scene.
-            - Adjusted height to [40vh] to keep him scaled well at that height.
-        */}
+        {/* 2. BUNDLED DOG & HEALTH */}
         <div className="absolute bottom-[28%] right-[5%] flex h-[40vh] aspect-[1/1.2] flex-col items-center justify-end md:right-auto md:left-[58%] md:h-[45vh]">
           {/* Health Bubble */}
           <div
