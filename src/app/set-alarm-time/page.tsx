@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import SceneBackground from "@/components/SceneBackground";
 import Hamburger from "@/components/Hamburger";
+import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/lib/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { scheduleCall } from "@/lib/bland-api";
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
 const IMG_DOG = "/images/dog_sitting.png";
@@ -24,10 +28,13 @@ function parseTimeInput(value: string): { hours: number; minutes: number } | nul
 }
 
 export default function SetAlarmTimePage() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [time, setTime] = useState({ hours: 9, minutes: 26 });
   const { hours, minutes } = time;
   const [inputValue, setInputValue] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const displayValue = isInputFocused ? inputValue : formatTime(hours, minutes);
 
@@ -62,6 +69,46 @@ export default function SetAlarmTimePage() {
       if (m === 0) return { hours: h === 0 ? 23 : h - 1, minutes: 59 };
       return { hours: h, minutes: m - 1 };
     });
+  };
+
+  const handleConfirm = async () => {
+    if (!user) {
+      alert("Please log in to set an alarm.");
+      return;
+    }
+    if (!db) {
+      alert("Database not initialized.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists() || !userDoc.data().phone) {
+        alert("Please set up a phone number in your account first.");
+        setIsSubmitting(false);
+        return;
+      }
+      const phone = userDoc.data().phone;
+
+      const now = new Date();
+      const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+      if (targetDate.getTime() <= now.getTime()) {
+        targetDate.setDate(targetDate.getDate() + 1);
+      }
+
+      const result = await scheduleCall(phone, targetDate);
+
+      await updateDoc(doc(db, "users", user.uid), {
+        alarmTime: targetDate.toISOString(),
+        blandCallId: result.call_id
+      });
+
+      router.push("/home-page");
+    } catch (err: any) {
+      alert("Failed to confirm alarm: " + err.message);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -124,15 +171,20 @@ export default function SetAlarmTimePage() {
                   </svg>
                 </button>
               </div>
-              <Link
-                href="/home-page"
+              <button
+                onClick={handleConfirm}
+                disabled={isSubmitting}
                 aria-label="Confirm alarm time"
-                className="btn btn-circle btn-sm border-2 border-[var(--dark-green)] bg-[var(--light-green)] text-white hover:bg-[var(--dark-green)] hover:border-[var(--light-green)] hover:text-[var(--light-green)]"
+                className="btn btn-circle btn-sm border-2 border-[var(--dark-green)] bg-[var(--light-green)] text-white hover:bg-[var(--dark-green)] hover:border-[var(--light-green)] hover:text-[var(--light-green)] disabled:opacity-50"
               >
-                <svg className="size-6 sm:size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              </Link>
+                {isSubmitting ? (
+                  <span className="loading loading-spinner loading-xs"></span>
+                ) : (
+                  <svg className="size-6 sm:size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
         </div>

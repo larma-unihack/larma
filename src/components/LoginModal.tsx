@@ -5,7 +5,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../lib/firebase";
 
 type LoginModalProps = {
   open: boolean;
@@ -15,7 +16,8 @@ type LoginModalProps = {
 export function LoginModal({ open, onClose }: LoginModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [isSignUp, setIsSignUp] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -29,13 +31,25 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
     setBusy(true);
     try {
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        if (!phone) {
+          setError("Phone number is required for registration");
+          setBusy(false);
+          return;
+        }
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        if (db) {
+          await setDoc(doc(db, "users", credential.user.uid), {
+            phone: phone,
+            email: email,
+          });
+        }
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
       onClose();
       setEmail("");
       setPassword("");
+      setPhone("");
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "message" in err
@@ -95,6 +109,23 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               autoComplete={isSignUp ? "new-password" : "current-password"}
             />
           </div>
+          {isSignUp && (
+            <div className="form-control w-full">
+              <label htmlFor="login-phone" className="label">
+                <span className="label-text">Phone Number</span>
+              </label>
+              <input
+                id="login-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                placeholder="+1 555 123 4567"
+                className="input input-bordered w-full"
+                autoComplete="tel"
+              />
+            </div>
+          )}
           {error && (
             <p className="text-sm text-error" role="alert">
               {error}

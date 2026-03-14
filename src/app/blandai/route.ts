@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Parse the body from your frontend fetch()
-    const { phoneNumber, pathwayId } = await request.json() as { phoneNumber: string, pathwayId: string };
+    const { phoneNumber, pathwayId, startTime } = await request.json() as { phoneNumber: string, pathwayId: string, startTime?: string };
 
     // 3. The actual API call to Bland
     const response = await fetch("https://api.bland.ai/v1/calls", {
@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         phone_number: phoneNumber,
         pathway_id: pathwayId,
+        ...(startTime && { start_time: startTime }),
       }),
     });
 

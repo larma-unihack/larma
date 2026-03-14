@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginModal } from "@/components/LoginModal";
-import { PlayButton } from "@/components/PlayButton";
+import { useRouter } from "next/navigation";
 
 import { motion } from "motion/react";
 import Link from "next/link";
@@ -25,7 +25,8 @@ const PLAY_TRIANGLE_FILL = "var(--dark-green)";
 const images = [IMG_DOG1, IMG_DOG2, IMG_DOG3, IMG_DOG4, IMG_DOG5];
 
 export default function Home() {
-  const { openLoginModal, setOpenLoginModal } = useAuth();
+  const { user, openLoginModal, setOpenLoginModal } = useAuth();
+  const router = useRouter();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentImage = images[currentIndex];
@@ -83,14 +84,6 @@ export default function Home() {
                 Next Image
               </button>
 
-              {/* Play button — opens login modal */}
-              <PlayButton />
-
-              <LoginModal
-                open={openLoginModal}
-                onClose={() => setOpenLoginModal(false)}
-              />
-
               <p className="absolute left-1/2 top-[10.74%] w-full max-w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]">
                 larma
               </p>
@@ -117,8 +110,15 @@ export default function Home() {
                 />
               </div>
 
-              <Link
-                href="/home-page"
+              <button
+                type="button"
+                onClick={() => {
+                  if (user) {
+                    router.push("/home-page");
+                  } else {
+                    setOpenLoginModal(true);
+                  }
+                }}
                 aria-label="Play"
                 className="pointer-events-auto absolute left-1/2 top-[36%] block h-[22%] w-[22%] max-w-[120px] -translate-x-1/2 cursor-pointer border-0 bg-transparent p-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa3bff] md:left-[44.53%] md:top-[38.33%] md:h-[19.44%] md:w-[10.94%] md:max-w-none md:translate-x-0"
               >
@@ -132,11 +132,16 @@ export default function Home() {
                   <circle cx="50" cy="50" r="50" fill={PLAY_CIRCLE_FILL} />
                   <path d="M40 26 L40 74 L74 50 Z" fill={PLAY_TRIANGLE_FILL} />
                 </svg>
-              </Link>
+              </button>
 
             </div>
           </div>
         </SceneBackground>
+
+        <LoginModal
+          open={openLoginModal}
+          onClose={() => setOpenLoginModal(false)}
+        />
       </div>
     </div>
   );
