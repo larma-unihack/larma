@@ -4,8 +4,6 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import SceneBackground from "@/components/SceneBackground";
 
-const IMG_MOUNTAIN =
-  "https://www.figma.com/api/mcp/asset/667c79f3-bad8-4f0e-acc7-70106e7b6239";
 const IMG_DOGS = "/images/dog_sitting.png";
 const IMG_TREE = "/images/tree.png";
 const PLAY_CIRCLE_FILL = "#569629";
@@ -34,17 +32,6 @@ export default function OpeningPage() {
           </motion.div>
 
         </div>
-
-      <div
-        className="pointer-events-none absolute left-[20%] top-[52%] h-[20%] w-[60%] opacity-30 md:left-[16.09%] md:top-[29.91%] md:h-[59.44%] md:w-[50.16%]"
-        aria-hidden
-      >
-        <img
-          alt=""
-          className="size-full max-w-none object-cover object-bottom"
-          src={IMG_MOUNTAIN}
-        />
-      </div>
 
       <p
         className="absolute left-1/2 top-[10.74%] w-full max-w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]"
