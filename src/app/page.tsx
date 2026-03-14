@@ -16,17 +16,17 @@ export default function OpeningPage() {
       <div className="pointer-events-none relative size-full flex-shrink-0 overflow-hidden">
 
         <div
-          className="pointer-events-none absolute z-1"
+          className="pointer-events-none absolute z-1 width-full"
           aria-hidden
         >
           <motion.div 
             initial = {{ y: 350, x: 0}}
-            animate = {{ y:350, x: 100}}
+            animate = {{ y:[0,350,0], x: 100}}
             transition = {{ duration:1 }}
           >
             <img
               alt=""
-              className="inset-0 scale-x-[-1] object-top"
+              className="relative inset-0 scale-x-[-1] object-top"
               src={IMG_DOGS}
             />
           </motion.div>
