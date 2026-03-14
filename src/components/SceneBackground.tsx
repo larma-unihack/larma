@@ -3,10 +3,6 @@
 const IMG_SKY = "/images/sky_bright.png";
 const IMG_GROUND = "/images/ground.png";
 
-/**
- * Shared sky + ground background. Use the same wrapper so it looks identical
- * on opening page and dashboard. Put page-specific content inside as children.
- */
 export default function SceneBackground({
   children,
 }: {
