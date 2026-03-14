@@ -19,6 +19,24 @@
 			"service": "larma"
 		}
 	],
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"persist": true,
+			"head_sampling_rate": 1
+		},
+		"traces": {
+			"enabled": true,
+			"persist": true,
+			"head_sampling_rate": 1
+		}
+	},
+	"placement": {
+		"mode": "targeted",
+		"region": "gcp:australia-southeast1"
+	},
 	"triggers": {
 		"crons": ["0 * * * *"]
 	},
