@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react"
+import Link from "next/link";
 
 /* Figma: UniHack2 Opening Page - Real (node-id=1-3). Responsive: %-based layout, full width. */
 const IMG_BG = "/images/sky_bright.png";
@@ -15,7 +16,7 @@ const IMG_TREE = "/images/tree.png";
 const PLAY_CIRCLE_FILL = "#569629";
 const PLAY_TRIANGLE_FILL = "#2d4f15";
 
-export default function Home() {
+export default function OpeningPage() {
   return (
     <div className="opening-page fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-white">
       <div className="opening-page__canvas relative flex-shrink-0 overflow-hidden">
@@ -110,11 +111,11 @@ export default function Home() {
           />
         </div>
 
-        {/* Play button — truly centered on mobile (left-1/2 -translate-x-1/2), larger for touch */}
-        <a
-          href="#play"
+        <Link
+          href="/home-page"
+          type="button"
           aria-label="Play"
-          className="absolute left-1/2 top-[36%] block h-[22%] w-[22%] max-w-[120px] -translate-x-1/2 cursor-pointer transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa3bff] md:left-[44.53%] md:top-[38.33%] md:h-[19.44%] md:w-[10.94%] md:max-w-none md:translate-x-0"
+          className="absolute left-1/2 top-[36%] block h-[22%] w-[22%] max-w-[120px] -translate-x-1/2 cursor-pointer border-0 bg-transparent p-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa3bff] md:left-[44.53%] md:top-[38.33%] md:h-[19.44%] md:w-[10.94%] md:max-w-none md:translate-x-0"
           data-node-id="1:8"
         >
           <svg
@@ -130,13 +131,12 @@ export default function Home() {
               r="50"
               fill={PLAY_CIRCLE_FILL}
             />
-            {/* Right-pointing play triangle, centered with slight right nudge */}
             <path
               d="M40 26 L40 74 L74 50 Z"
               fill={PLAY_TRIANGLE_FILL}
             />
           </svg>
-        </a>
+        </Link>
       </div>
     </div>
   );
