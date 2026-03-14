@@ -31,3 +31,12 @@ body {
   max-height: 100vh;
   aspect-ratio: 1920 / 1080;
 }
+
+/* Portrait: full height so it works vertically on mobile */
+@media (orientation: portrait) {
+  .opening-page__canvas {
+    width: 177.78vh;
+    height: 100vh;
+    max-height: none;
+  }
+}

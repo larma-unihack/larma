@@ -7,10 +7,10 @@ const IMG_MOUNTAIN =
 const IMG_DOGS =
   "https://www.figma.com/api/mcp/asset/78192275-a9df-4389-83bd-8287ff7ff289";
 const IMG_GROUND = "/images/ground.png";
-const IMG_PLAY_CIRCLE =
-  "https://www.figma.com/api/mcp/asset/7ac2d2a4-81ef-4353-b71e-c97471a724ee";
-const IMG_PLAY_TRIANGLE =
-  "https://www.figma.com/api/mcp/asset/73d450d4-8b06-4c33-9026-4740253999e9";
+
+/* Play button colors (vector style, matches pixel-art green) */
+const PLAY_CIRCLE_FILL = "#569629";
+const PLAY_TRIANGLE_FILL = "#2d4f15";
 
 export default function Home() {
   return (
@@ -52,34 +52,40 @@ export default function Home() {
           />
         </div>
 
-        {/* Title — scales with viewport width */}
+        {/* Title — bigger on mobile, scales on larger screens */}
         <p
-          className="absolute left-1/2 top-[10.74%] w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[13.33vw] leading-none not-italic text-black md:text-[clamp(80px,13vw,256px)]"
+          className="absolute left-1/2 top-[10.74%] w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]"
           data-node-id="1:7"
         >
           larma
         </p>
 
-        {/* Play button */}
+        {/* Play button — vector circle + triangle */}
         <a
           href="#play"
           aria-label="Play"
           className="absolute left-[44.53%] top-[38.33%] block h-[19.44%] w-[10.94%] cursor-pointer transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa3bff]"
           data-node-id="1:8"
         >
-          <img
-            alt=""
-            className="absolute inset-0 block size-full object-contain"
-            src={IMG_PLAY_CIRCLE}
-          />
-          {/* Triangle (play icon) — centered with slight right nudge for optical balance */}
-          <span className="absolute inset-0 flex items-center justify-center [transform:translateX(4%)]" aria-hidden>
-            <img
-              alt=""
-              className="h-[48%] w-[48%] rotate-90 object-contain object-center"
-              src={IMG_PLAY_TRIANGLE}
+          <svg
+            viewBox="0 0 100 100"
+            className="block size-full"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden
+          >
+            <circle
+              cx="50"
+              cy="50"
+              r="50"
+              fill={PLAY_CIRCLE_FILL}
             />
-          </span>
+            {/* Right-pointing play triangle, centered with slight right nudge */}
+            <path
+              d="M40 26 L40 74 L74 50 Z"
+              fill={PLAY_TRIANGLE_FILL}
+            />
+          </svg>
         </a>
       </div>
     </div>
