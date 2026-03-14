@@ -6,8 +6,8 @@ import SceneBackground from "@/components/SceneBackground";
 
 const IMG_DOGS = "/images/dog_sitting.png";
 const IMG_TREE = "/images/tree.png";
-const PLAY_CIRCLE_FILL = "#569629";
-const PLAY_TRIANGLE_FILL = "#2d4f15";
+const PLAY_CIRCLE_FILL = "var(--light-green)";
+const PLAY_TRIANGLE_FILL = "var(--dark-green)";
 
 export default function OpeningPage() {
   return (

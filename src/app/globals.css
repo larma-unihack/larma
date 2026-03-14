@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --light-green: #569629;
+  --dark-green: #2d4f15;
 }
 
 @theme inline {
