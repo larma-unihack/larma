@@ -1,7 +1,5 @@
 "use client";
 
-import { useAuth } from "@/contexts/AuthContext";
-import { LoginModal } from "@/components/LoginModal";
 import SceneBackground from "@/components/SceneBackground";
 import Link from "next/link";
 import Hamburger from "@/components/Hamburger";
@@ -15,17 +13,11 @@ interface HomeViewProps {
 }
 
 export default function HomeView({ hasStarted = true }: HomeViewProps) {
-  const { openLoginModal, setOpenLoginModal } = useAuth();
-
   return (
     <SceneBackground>
-      {/* CHANGED: Changed min-h-screen to min-h-dvh for better mobile support.
-        CHANGED: Added absolute inset-0 to pin the UI layer exactly to the background.
-      */}
       <div className="absolute inset-0 flex flex-col overflow-hidden min-h-dvh w-full">
         {hasStarted && <Hamburger />}
 
-        {/* 1. LEFT DATA SQUARE */}
         <div
           className="absolute left-[4%] top-[10%] h-[40vh] w-[35vw] max-w-[260px] md:w-[25vw]"
           aria-hidden
@@ -52,9 +44,7 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           </div>
         </div>
 
-        {/* 2. BUNDLED DOG & HEALTH */}
         <div className="absolute bottom-[28%] right-[5%] flex h-[40vh] aspect-[1/1.2] flex-col items-center justify-end md:right-auto md:left-[58%] md:h-[45vh]">
-          {/* Health Bubble */}
           <div
             className={`relative w-full h-[40%] transition-all duration-300 ${
               hasStarted
@@ -76,7 +66,6 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
             </div>
           </div>
 
-          {/* Dog Image */}
           <div className="relative h-[65%] w-full mt-[-5%]">
             <img
               alt="Dog"
@@ -85,11 +74,6 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
             />
           </div>
         </div>
-
-        <LoginModal
-          open={openLoginModal}
-          onClose={() => setOpenLoginModal(false)}
-        />
       </div>
     </SceneBackground>
   );

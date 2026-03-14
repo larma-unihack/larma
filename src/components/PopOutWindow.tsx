@@ -1,5 +1,8 @@
 "use client";
 
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
 export default function PopOutWindow({
   isOpen,
   onClose,
@@ -9,6 +12,13 @@ export default function PopOutWindow({
   onClose: () => void;
   children?: React.ReactNode;
 }) {
+  const handleSignOut = async () => {
+    if (auth) {
+      await signOut(auth);
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -36,7 +46,20 @@ export default function PopOutWindow({
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
-          <div className="mt-10 flex-1">{children}</div>
+          <div className="mt-10 flex-1 overflow-y-auto">
+            <p className="mb-4 text-sm text-gray-600">
+            <b>Tip:</b> <br /> 
+                Want to improve pet health? <br />
+                Wake up to your phone call every morning to increase your pet's health! But, be careful, everytime you snooze, your pet's health will decrease by 10%! <br />
+            </p>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="mt-auto w-full rounded border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </aside>
     </>
