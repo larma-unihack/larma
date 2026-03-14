@@ -33,21 +33,10 @@ body {
   image-rendering: crisp-edges; /* Safari */
 }
 
-/* Opening page: full-width responsive canvas, 16:9 to viewport, capped so it doesn't over-zoom */
+/* Scene canvas: fill viewport so all pages (alarm-set, home, etc.) can use full screen */
 .opening-page__canvas {
   width: 100vw;
-  height: min(56.25vw, 100vh);
-  max-height: 100vh;
-  aspect-ratio: 1920 / 1080;
+  height: 100vh;
+  min-height: 100vh;
   flex-shrink: 0;
-}
-
-/* Portrait: full height, fills screen vertically (sides cropped) */
-@media (orientation: portrait) {
-  .opening-page__canvas {
-    width: 177.78vh;
-    height: 100vh;
-    max-height: none;
-    aspect-ratio: 1920 / 1080;
-  }
 }
