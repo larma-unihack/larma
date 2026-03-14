@@ -4,6 +4,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --light-green: #569629;
+  --dark-green: #2d4f15;
 }
 
 @theme inline {
@@ -34,15 +36,18 @@ body {
 /* Opening page: full-width responsive canvas, 16:9 to viewport, capped so it doesn't over-zoom */
 .opening-page__canvas {
   width: 100vw;
+  height: min(56.25vw, 100vh);
   max-height: 100vh;
   aspect-ratio: 1920 / 1080;
+  flex-shrink: 0;
 }
 
-/* Portrait: full height so it works vertically on mobile */
+/* Portrait: full height, fills screen vertically (sides cropped) */
 @media (orientation: portrait) {
   .opening-page__canvas {
     width: 177.78vh;
     height: 100vh;
     max-height: none;
+    aspect-ratio: 1920 / 1080;
   }
 }
