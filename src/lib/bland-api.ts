@@ -1,4 +1,4 @@
-export async function scheduleCall(phoneNumber: string, date?: Date) {
+export async function scheduleCall(phoneNumber: string, date?: Date, previousCallId?: string) {
   try {
     let finalDate = date;
 
@@ -12,16 +12,23 @@ export async function scheduleCall(phoneNumber: string, date?: Date) {
       }
     }
 
+    const payload: Record<string, any> = {
+      phoneNumber,
+      pathwayId: process.env.NEXT_PUBLIC_BLAND_PATHWAY_ID,
+    };
+    if (finalDate) {
+      payload.startTime = finalDate.toISOString();
+    }
+    if (previousCallId) {
+      payload.previousCallId = previousCallId;
+    }
+
     const response = await fetch("/blandai", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        phoneNumber,
-        startTime: finalDate ? finalDate.toISOString() : undefined,
-        pathwayId: process.env.NEXT_PUBLIC_BLAND_PATHWAY_ID,
-      }),
+      body: JSON.stringify(payload),
     });
 
     const result = (await response.json()) as any;

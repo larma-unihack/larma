@@ -70,7 +70,8 @@ export default function AlarmSetPage() {
         targetDate.setDate(targetDate.getDate() + 1);
       }
 
-      const result = await scheduleCall(phone, targetDate);
+      const previousCallId = userDoc.data()?.blandCallId;
+      const result = await scheduleCall(phone, targetDate, previousCallId);
 
       await updateDoc(doc(db, "users", user.uid), {
         alarmTime: targetDate.toISOString(),

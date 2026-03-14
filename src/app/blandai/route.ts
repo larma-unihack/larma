@@ -18,7 +18,21 @@ export async function POST(request: Request) {
     }
 
     // 2. Parse the body from your frontend fetch()
-    const { phoneNumber, pathwayId, startTime } = await request.json() as { phoneNumber: string, pathwayId: string, startTime?: string };
+    const { phoneNumber, pathwayId, startTime, previousCallId } = await request.json() as { phoneNumber: string, pathwayId: string, startTime?: string, previousCallId?: string };
+
+    // 2.5 Stop previous call if it exists
+    if (previousCallId) {
+      try {
+        await fetch(`https://api.bland.ai/v1/calls/${previousCallId}/stop`, {
+          method: "POST",
+          headers: {
+            Authorization: BLAND_AI_KEY
+          }
+        });
+      } catch (e) {
+        console.error("Failed to cancel previous Bland AI call", e);
+      }
+    }
 
     // 3. The actual API call to Bland
     const response = await fetch("https://api.bland.ai/v1/calls", {
