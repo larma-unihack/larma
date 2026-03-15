@@ -38,11 +38,11 @@ export default function Home() {
               <Dog x={800} y={500} begin={1300} width={150} height={100}/>
               <Dog x={700} y={545} begin={700} width={100} height={100}/>
               <Dog x={900} y={550} begin={1400} width={80} height={100}/>
-              <Dog x={900} y={430} begin={1200} width={300} height={100}/>
-              <Dog x={900} y={450} begin={1200} width={250} height={100}/>
               <Dog x={50} y={540} begin={500} width={80} height={100}/>
               <Dog x={300} y={550} begin={300} width={80} height={100}/>
               <Dog x={700} y={540} begin={1800} width={80} height={100}/>
+              <Dog x={900} y={430} begin={1200} width={300} height={100}/>
+              <Dog x={900} y={450} begin={1200} width={250} height={100}/>
 
 
 

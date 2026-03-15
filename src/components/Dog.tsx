@@ -58,10 +58,11 @@ export default function Dog({ x, y, begin, width, height }: { x: number, y: numb
       const newY = Math.floor(Math.random() * 50) + 500 + (250-width);
       setYValue(newY)
       setTargetValue(newValue);
+      const z = newY - (250-width)
       if (value <  newValue) {
-        setStyle("absolute inset-0 scale-x-[-1] object-top")
+        setStyle("absolute inset-0 scale-x-[-1] object-top z-"+ z)
       } else if (value > newValue) {
-        setStyle("absolute inset-0 scale-x-[1] object-top")
+        setStyle("absolute inset-0 scale-x-[1] object-top z-"+ z)
       }
       horizontal.set(targetValue);
     }, 10000)
