@@ -7,7 +7,6 @@ import { useAlarmStatus } from "@/hooks/useAlarmStatus";
 import Dog from "@/components/Dog";
 // import "../app/global.css";
 
-
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
 const IMG_DOG = "/images/dog_sitting.png";
 const IMG_HEART = "/images/heart.gif";
@@ -56,12 +55,10 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           className="absolute left-[2%] top-[1%] h-[30vh] w-[38vw] sm:left-[3%] sm:top-[9%] sm:h-[35vh] sm:min-h-[180px] sm:w-[36vw] sm:max-w-[240px] md:left-[4%] md:top-[10%] md:h-[40vh] md:min-h-[200px] md:w-[25vw] md:max-w-[260px] lg:max-w-[280px]"
           aria-hidden
         >
-              <Dog x={800} y={400} begin={1000} width={300} height={150}/>
+          <Dog x={800} y={400} begin={1000} width={300} height={150} />
 
           {showSquareContent && (
-            <div
-              className="absolute inset-0 size-full object-contain bg-light-green"
-            >
+            <div className="absolute inset-0 size-full object-contain bg-light-green">
               {/* Top white section */}
               <Link
                 href="/set-alarm-time"
@@ -77,13 +74,10 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
                   Avg Snoozes: 2
                 </p>
               </div>
-              
             </div>
           )}
           {!loading && alarmSet && (
-            <div
-              className="absolute inset-0 size-full object-contain bg-light-green"
-            >
+            <div className="absolute inset-0 size-full object-contain bg-light-green">
               <Link
                 href="/set-alarm-time"
                 className="absolute left-[12%] right-[12%] top-[10%] flex h-[20%] items-center justify-center text-center cursor-pointer hover:opacity-90 bg-white"
@@ -94,7 +88,10 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
                 </p>
               </Link>
               <div className="absolute left-[12%] right-[12%] top-[40%] flex h-[20%] items-center justify-center text-center bg-white">
-                <p className="max-w-full truncate text-xs text-wrap font-medium leading-tight font-bold text-gray-800 sm:text-2xl md:text-xl" title={phone ?? undefined}  >
+                <p
+                  className="max-w-full truncate text-xs text-wrap font-medium leading-tight font-bold text-gray-800 sm:text-2xl md:text-xl"
+                  title={phone ?? undefined}
+                >
                   Phone: {phone ?? "—"}
                 </p>
               </div>
@@ -105,15 +102,15 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               </div>
             </div>
           )}
-
         </div>
 
         <div className="absolute bottom-[28%] right-[5%] flex h-[40vh] aspect-[1/1.2] flex-col items-center justify-end md:right-auto md:left-[58%] md:h-[45vh]">
           <div
-            className={`relative w-full h-[40%] transition-all duration-300 ${hasStarted
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-4"
-              }`}
+            className={`relative w-full h-[40%] transition-all duration-300 ${
+              hasStarted
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
+            }`}
           >
             <div className="relative h-full w-full">
               <img
@@ -136,7 +133,10 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               src={IMG_DOG}
             />
             {showHearts && (
-              <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center" aria-hidden>
+              <div
+                className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center"
+                aria-hidden
+              >
                 <img
                   alt=""
                   className="absolute top-[6%] left-[18%] h-[10%] min-h-[50px] w-auto -translate-x-1/2 object-contain md:top-[8%] md:h-[12%]"
@@ -155,7 +155,10 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               </div>
             )}
             {showSleep && (
-              <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center" aria-hidden>
+              <div
+                className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center"
+                aria-hidden
+              >
                 <img
                   alt=""
                   className="absolute top-[5%] left-1/2 h-[10%] min-h-[58px] w-auto -translate-x-1/2 object-contain md:top-[6%] md:h-[12%]"
@@ -176,6 +179,9 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           </div>
         </div>
       </div>
+      <Dog x={300} y={460} begin={800} width={200} height={200} />
+      <Dog x={500} y={460} begin={500} width={200} height={100} />
+      <Dog x={500} y={555} begin={200} width={80} height={100} />
     </SceneBackground>
   );
 }
