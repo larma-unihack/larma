@@ -101,7 +101,10 @@ export async function POST(request: Request) {
     );
 
     if (dailyLog?.checkedInAt) {
-      await updateUserFields(userId, { nextAlarmTime });
+      await updateUserFields(userId, {
+        lastCheckedInDate: dateKey,
+        nextAlarmTime,
+      });
       return NextResponse.json({ success: true, alreadyCheckedIn: true });
     }
 
@@ -127,6 +130,7 @@ export async function POST(request: Request) {
 
     await updateUserFields(userId, {
       health: nextHealth,
+      lastCheckedInDate: dateKey,
       nextAlarmTime,
     });
 

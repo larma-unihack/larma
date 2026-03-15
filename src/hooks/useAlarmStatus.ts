@@ -33,7 +33,6 @@ export function useAlarmStatus(): {
   useEffect(() => {
     const uid = user?.uid;
     const firestore = db;
-    let unsubscribeDailyLog: (() => void) | null = null;
 
     if (!uid || !firestore) {
       queueMicrotask(() => {
@@ -80,11 +79,6 @@ export function useAlarmStatus(): {
         }
         setSnoozeMinutes(normalizeSnoozeMinutes(data?.snoozeMinutes));
 
-        if (unsubscribeDailyLog) {
-          unsubscribeDailyLog();
-          unsubscribeDailyLog = null;
-        }
-
         if (!pref) {
           setHasCheckedInToday(null);
           setLoading(false);
@@ -92,26 +86,14 @@ export function useAlarmStatus(): {
         }
 
         const dateKey = getLocalDateKey(new Date(), pref.timezone);
-        unsubscribeDailyLog = onSnapshot(
-          doc(firestore, "users", uid, "dailyLogs", dateKey),
-          (dailyLogDoc) => {
-            const checkedInAt = dailyLogDoc.data()?.checkedInAt;
-            setHasCheckedInToday(
-              typeof checkedInAt === "string" && checkedInAt.length > 0
-            );
-          },
-          () => {
-            setHasCheckedInToday(false);
-          }
+        setHasCheckedInToday(
+          typeof data?.lastCheckedInDate === "string" &&
+            data.lastCheckedInDate === dateKey
         );
 
         setLoading(false);
       },
       () => {
-        if (unsubscribeDailyLog) {
-          unsubscribeDailyLog();
-          unsubscribeDailyLog = null;
-        }
         setAlarmSet(false);
         setAlarmTime(null);
         setPhone(null);
@@ -123,9 +105,6 @@ export function useAlarmStatus(): {
     );
 
     return () => {
-      if (unsubscribeDailyLog) {
-        unsubscribeDailyLog();
-      }
       unsubscribe();
     };
   }, [user?.uid]);
