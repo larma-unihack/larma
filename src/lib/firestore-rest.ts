@@ -453,6 +453,18 @@ export async function updateUserNextAlarmTime(userId: string, nextAlarmTime: str
   await updateUserFields(userId, { nextAlarmTime });
 }
 
+export async function getUserById(userId: string): Promise<TriggerableUser | null> {
+  const { project_id } = getServiceAccount();
+  const doc = await firestoreRequestOrNull<{
+    name: string;
+    fields?: Record<string, Record<string, unknown>>;
+  }>(
+    `/projects/${project_id}/databases/(default)/documents/users/${encodeURIComponent(userId)}`
+  );
+
+  return doc ? mapTriggerableUser(doc) : null;
+}
+
 export async function findUserByPhone(phone: string): Promise<TriggerableUser | null> {
   const { project_id } = getServiceAccount();
   const results = await firestoreRequest<

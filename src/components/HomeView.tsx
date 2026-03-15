@@ -1,19 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import SceneBackground, { type SkyVariant } from "@/components/SceneBackground";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Hamburger from "@/components/Hamburger";
 import { useAlarmStatus } from "@/hooks/useAlarmStatus";
 import Dog from "@/components/Dog";
 import { useAuth } from "@/contexts/AuthContext";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import {
-  getLocalDateKey,
-  getNextDayAlarmISO,
-  normalizeTime,
-} from "@/lib/alarm-time";
 // import "../app/global.css";
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
@@ -45,97 +38,24 @@ function getSkyVariant(health: number | null): SkyVariant {
   return "ultra-dark";
 }
 
-function clampHealth(value: number): number {
-  if (value < 0) return 0;
-  if (value > 100) return 100;
-  return value;
-}
-
 export default function HomeView({ hasStarted = true }: HomeViewProps) {
-  const { alarmSet, alarmTime, phone, loading, health, snoozeMinutes } =
-    useAlarmStatus();
+  const {
+    alarmSet,
+    alarmTime,
+    phone,
+    loading,
+    health,
+    snoozeMinutes,
+    hasCheckedInToday,
+  } = useAlarmStatus();
   const { user } = useAuth();
-  const [isCheckingIn, setIsCheckingIn] = useState(false);
-  const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
+  const router = useRouter();
   const showSquareContent = !loading && !alarmSet;
   const showHearts = health != null && health >= 50;
   const showSleep = health != null && health < 50;
   const skyVariant = getSkyVariant(health);
-
-  const handleCheckIn = async () => {
-    if (!user?.uid || !db || isCheckingIn) return;
-
-    setIsCheckingIn(true);
-    setCheckInMessage(null);
-
-    try {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      const data = userSnap.data();
-      const timezone =
-        typeof data?.timezone === "string"
-          ? data.timezone
-          : Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const pref = normalizeTime(data?.time, timezone);
-
-      if (!pref) {
-        setCheckInMessage("Set your alarm first.");
-        return;
-      }
-
-      const now = new Date();
-      const nowIso = now.toISOString();
-      const dateKey = getLocalDateKey(now, pref.timezone);
-      const dailyLogRef = doc(db, "users", user.uid, "dailyLogs", dateKey);
-      const dailyLogSnap = await getDoc(dailyLogRef);
-      const dailyLog = dailyLogSnap.data();
-      const snoozeCount =
-        typeof dailyLog?.snoozeCount === "number" ? dailyLog.snoozeCount : 0;
-      const currentHealth =
-        typeof data?.health === "number" ? clampHealth(data.health) : 100;
-      const nextHealth =
-        snoozeCount === 0 ? clampHealth(currentHealth + 10) : currentHealth;
-
-      await setDoc(
-        dailyLogRef,
-        {
-          date: dateKey,
-          timezone: pref.timezone,
-          triggeredCallTimes: Array.isArray(dailyLog?.triggeredCallTimes)
-            ? dailyLog.triggeredCallTimes
-            : [],
-          responseTimes: Array.isArray(dailyLog?.responseTimes)
-            ? dailyLog.responseTimes
-            : [],
-          snoozeResponseTimes: Array.isArray(dailyLog?.snoozeResponseTimes)
-            ? dailyLog.snoozeResponseTimes
-            : [],
-          wakeUpResponseTimes: Array.isArray(dailyLog?.wakeUpResponseTimes)
-            ? dailyLog.wakeUpResponseTimes
-            : [],
-          snoozeCount,
-          checkedInAt: nowIso,
-        },
-        { merge: true },
-      );
-
-      await updateDoc(userRef, {
-        health: nextHealth,
-        nextAlarmTime: getNextDayAlarmISO(
-          pref.hours,
-          pref.minutes,
-          pref.timezone,
-          now,
-        ),
-      });
-
-      setCheckInMessage("Checked in.");
-    } catch {
-      setCheckInMessage("Check-in failed.");
-    } finally {
-      setIsCheckingIn(false);
-    }
-  };
+  const shouldPromptCheckIn =
+    !loading && alarmSet && hasCheckedInToday === false;
 
   return (
     <SceneBackground skyVariant={skyVariant}>
@@ -209,7 +129,9 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               />
               <div className="absolute inset-0 flex items-center justify-center pb-[18%] pr-[5%]">
                 <p className="text-center text-[clamp(0.7rem,2.2vh,1.1rem)] font-bold text-gray-800">
-                  Health: {health != null ? `${health}%` : "—"}
+                  {shouldPromptCheckIn
+                    ? "Check in!"
+                    : `Health: ${health != null ? `${health}%` : "—"}`}
                 </p>
               </div>
             </div>
@@ -218,8 +140,8 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           <div className="relative h-[65%] w-full mt-[-5%]">
             <button
               type="button"
-              onClick={handleCheckIn}
-              disabled={isCheckingIn || !alarmSet || !user}
+              onClick={() => router.push("/check-in-page")}
+              disabled={!alarmSet || !user}
               className="relative z-10 size-full disabled:cursor-not-allowed"
               aria-label="Check in with your dog"
             >
@@ -272,11 +194,6 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
                   src={IMG_SLEEP}
                 />
               </div>
-            )}
-            {checkInMessage && (
-              <p className="pointer-events-none absolute bottom-[-10%] left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded bg-white/80 px-2 py-1 text-xs font-bold text-gray-800">
-                {checkInMessage}
-              </p>
             )}
           </div>
         </div>
