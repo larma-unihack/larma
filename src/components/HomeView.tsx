@@ -1,6 +1,6 @@
 "use client";
 
-import SceneBackground from "@/components/SceneBackground";
+import SceneBackground, { type SkyVariant } from "@/components/SceneBackground";
 import Link from "next/link";
 import Hamburger from "@/components/Hamburger";
 import { useAlarmStatus } from "@/hooks/useAlarmStatus";
@@ -26,15 +26,23 @@ function formatAlarmTime(isoString: string | null): string {
   }
 }
 
+function getSkyVariant(health: number | null): SkyVariant {
+  if (health == null) return "bright";
+  if (health >= 70) return "bright";
+  if (health >= 40) return "dark";
+  return "ultra-dark";
+}
+
 export default function HomeView({ hasStarted = true }: HomeViewProps) {
-  const { alarmSet, alarmTime, phone, loading, health } = useAlarmStatus();
+  let { alarmSet, alarmTime, phone, loading, health } = useAlarmStatus();
   const showSquareContent = !loading && !alarmSet;
   const leftPanelImage = loading || !alarmSet ? IMG_SQUARE : IMG_RECTANGLE;
   const showHearts = health != null && health >= 50;
   const showSleep = health != null && health < 50;
+  const skyVariant = getSkyVariant(health);
 
   return (
-    <SceneBackground>
+    <SceneBackground skyVariant={skyVariant}>
       <div className="absolute inset-0 flex flex-col overflow-hidden min-h-dvh w-full">
         {hasStarted && <Hamburger />}
 
@@ -138,7 +146,7 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center" aria-hidden>
                 <img
                   alt=""
-                  className="absolute top-[18%] left-1/2 h-[14%] min-h-[36px] w-auto -translate-x-1/2 object-contain md:top-[20%] md:h-[16%]"
+                  className="absolute top-[18%] left-1/2 h-[14%] min-h-[50px] w-auto -translate-x-1/2 object-contain md:top-[20%] md:h-[16%]"
                   src={IMG_SLEEP}
                 />
               </div>

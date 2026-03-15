@@ -1,18 +1,28 @@
 "use client";
 
-const IMG_SKY = "/images/sky_bright.png";
+const SKY_IMAGES = {
+  bright: "/images/sky_bright.png",
+  dark: "/images/dark-sky.png",
+  "ultra-dark": "/images/ultra-dark-sky.png",
+} as const;
+
 const IMG_GROUND = "/images/ground.png";
 const IMG_MOUNTAIN = "/images/mountain.png";
 
+export type SkyVariant = keyof typeof SKY_IMAGES;
+
 export default function SceneBackground({
   children,
+  skyVariant = "bright",
 }: {
   children: React.ReactNode;
+  skyVariant?: SkyVariant;
 }) {
+  const skySrc = SKY_IMAGES[skyVariant];
+
   return (
     <div className="opening-page fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-white">
       <div className="opening-page__canvas relative h-full w-full flex-shrink-0 overflow-hidden">
-        {/* 1. SKY (Base layer) */}
         <div
           className="pointer-events-none absolute inset-0 h-[72%] w-full overflow-hidden opacity-90 md:h-[66.76%]"
           aria-hidden
@@ -20,7 +30,7 @@ export default function SceneBackground({
           <img
             alt=""
             className="absolute inset-0 size-full object-cover object-top"
-            src={IMG_SKY}
+            src={skySrc}
           />
           {/* Shadow stays behind the mountain */}
           <div className="absolute inset-0 shadow-[0px_4px_200px_0px_rgba(0,0,0,0.15)]" />
