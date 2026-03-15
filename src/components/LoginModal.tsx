@@ -44,6 +44,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
             phone: phone,
             email: email,
             health: 100,
+            snoozeMinutes: 5,
           });
         }
       } else {

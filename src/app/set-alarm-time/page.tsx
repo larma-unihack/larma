@@ -7,7 +7,11 @@ import Hamburger from "@/components/Hamburger";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { getNextAlarmISO, normalizeTime } from "@/lib/alarm-time";
+import {
+  getNextAlarmISO,
+  normalizeSnoozeMinutes,
+  normalizeTime,
+} from "@/lib/alarm-time";
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
 const IMG_DOG = "/images/dog_sitting.png";
@@ -33,10 +37,10 @@ export default function SetAlarmTimePage() {
   const router = useRouter();
   const { user } = useAuth();
   const [time, setTime] = useState(DEFAULT_TIME);
-  const [timeLoaded, setTimeLoaded] = useState(false);
   const { hours, minutes } = time;
   const [inputValue, setInputValue] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [snoozeMinutes, setSnoozeMinutes] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -47,9 +51,9 @@ export default function SetAlarmTimePage() {
         const tz = typeof data?.timezone === "string" ? data.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
         const pref = normalizeTime(data?.time, tz);
         if (pref) setTime({ hours: pref.hours, minutes: pref.minutes });
+        setSnoozeMinutes(normalizeSnoozeMinutes(data?.snoozeMinutes));
       })
       .catch(() => {})
-      .finally(() => setTimeLoaded(true));
   }, [user?.uid]);
 
   const displayValue = isInputFocused ? inputValue : formatTime(hours, minutes);
@@ -87,6 +91,10 @@ export default function SetAlarmTimePage() {
     });
   };
 
+  const handleSnoozeChange = (value: number) => {
+    setSnoozeMinutes(normalizeSnoozeMinutes(value));
+  };
+
   const handleConfirm = async () => {
     if (!user) {
       alert("Please log in to set an alarm.");
@@ -105,19 +113,19 @@ export default function SetAlarmTimePage() {
         setIsSubmitting(false);
         return;
       }
-      const phone = userDoc.data().phone;
-
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const nextAlarmTime = getNextAlarmISO(hours, minutes, timezone);
 
       await updateDoc(doc(db, "users", user.uid), {
         time: { hours, minutes, timezone },
         nextAlarmTime,
+        snoozeMinutes,
       });
 
       router.push("/home-page");
-    } catch (err: any) {
-      alert("Failed to confirm alarm: " + err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      alert("Failed to confirm alarm: " + message);
       setIsSubmitting(false);
     }
   };
@@ -140,7 +148,7 @@ export default function SetAlarmTimePage() {
         </div>
 
         {/* Speech bubble above dog: time + up/down arrows + checkmark */}
-        <div className="absolute left-[38%] top-[12%] flex h-[32%] w-[52%] max-w-[320px] items-center justify-center md:left-[42%] md:top-[14%] md:h-[30%] md:w-[44%]">
+        <div className="absolute left-[38%] top-[12%] flex h-[38%] w-[52%] max-w-[320px] items-center justify-center md:left-[42%] md:top-[14%] md:h-[36%] md:w-[44%]">
           <div className="relative h-full w-full">
             <img
               alt=""
@@ -195,6 +203,35 @@ export default function SetAlarmTimePage() {
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
                 )}
+              </button>
+            </div>
+            <div className="absolute left-[18%] right-[18%] top-[56%] flex items-center justify-center gap-2 text-[var(--dark-green)]">
+              <span className="text-xs font-bold sm:text-sm">Snooze</span>
+              <button
+                type="button"
+                aria-label="Decrease snooze time"
+                className="btn btn-circle btn-xs border-2 border-[var(--dark-green)] bg-white text-[var(--dark-green)] hover:bg-[var(--light-green)] hover:text-white"
+                onClick={() => handleSnoozeChange(snoozeMinutes - 1)}
+              >
+                -
+              </button>
+              <input
+                type="number"
+                min={1}
+                max={60}
+                value={snoozeMinutes}
+                onChange={(e) => handleSnoozeChange(Number(e.target.value))}
+                aria-label="Snooze minutes"
+                className="input input-bordered input-xs w-16 border-2 border-white bg-white text-center text-[var(--dark-green)]"
+              />
+              <span className="text-xs font-bold sm:text-sm">min</span>
+              <button
+                type="button"
+                aria-label="Increase snooze time"
+                className="btn btn-circle btn-xs border-2 border-[var(--dark-green)] bg-white text-[var(--dark-green)] hover:bg-[var(--light-green)] hover:text-white"
+                onClick={() => handleSnoozeChange(snoozeMinutes + 1)}
+              >
+                +
               </button>
             </div>
           </div>

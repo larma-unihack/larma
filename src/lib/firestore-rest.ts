@@ -1,3 +1,5 @@
+import { normalizeSnoozeMinutes } from "@/lib/alarm-time";
+
 type ServiceAccount = {
   client_email: string;
   private_key: string;
@@ -26,6 +28,19 @@ export type TriggerableUser = {
   timezone?: string;
   time?: unknown;
   nextAlarmTime?: string;
+  health?: number;
+  snoozeMinutes?: number;
+  pendingSnooze?: boolean;
+  pendingSnoozeRequestedAt?: string;
+};
+
+export type UserDailyLog = {
+  date: string;
+  timezone: string;
+  triggeredCallTimes: string[];
+  snoozeTimes: string[];
+  snoozeCount: number;
+  checkedInAt?: string;
 };
 
 const FIRESTORE_SCOPE = "https://www.googleapis.com/auth/datastore";
@@ -233,13 +248,19 @@ function getDocumentId(name: string): string {
   return parts[parts.length - 1] || name;
 }
 
+function mapDecodedFields(
+  fields: Record<string, Record<string, unknown>> | undefined
+): Record<string, FirestoreValue> {
+  return Object.fromEntries(
+    Object.entries(fields || {}).map(([key, value]) => [key, decodeFirestoreValue(value)])
+  );
+}
+
 function mapTriggerableUser(doc: {
   name: string;
   fields?: Record<string, Record<string, unknown>>;
 }): TriggerableUser {
-  const fields = Object.fromEntries(
-    Object.entries(doc.fields || {}).map(([key, value]) => [key, decodeFirestoreValue(value)])
-  );
+  const fields = mapDecodedFields(doc.fields);
 
   return {
     id: getDocumentId(doc.name),
@@ -247,7 +268,34 @@ function mapTriggerableUser(doc: {
     timezone: typeof fields.timezone === "string" ? fields.timezone : undefined,
     time: fields.time,
     nextAlarmTime: typeof fields.nextAlarmTime === "string" ? fields.nextAlarmTime : undefined,
+    health: typeof fields.health === "number" ? fields.health : undefined,
+    snoozeMinutes: normalizeSnoozeMinutes(fields.snoozeMinutes),
+    pendingSnooze: fields.pendingSnooze === true,
+    pendingSnoozeRequestedAt:
+      typeof fields.pendingSnoozeRequestedAt === "string"
+        ? fields.pendingSnoozeRequestedAt
+        : undefined,
   } satisfies TriggerableUser;
+}
+
+function mapUserDailyLog(doc: {
+  name: string;
+  fields?: Record<string, Record<string, unknown>>;
+}): UserDailyLog {
+  const fields = mapDecodedFields(doc.fields);
+
+  return {
+    date: typeof fields.date === "string" ? fields.date : getDocumentId(doc.name),
+    timezone: typeof fields.timezone === "string" ? fields.timezone : "UTC",
+    triggeredCallTimes: Array.isArray(fields.triggeredCallTimes)
+      ? fields.triggeredCallTimes.filter((value): value is string => typeof value === "string")
+      : [],
+    snoozeTimes: Array.isArray(fields.snoozeTimes)
+      ? fields.snoozeTimes.filter((value): value is string => typeof value === "string")
+      : [],
+    snoozeCount: typeof fields.snoozeCount === "number" ? fields.snoozeCount : 0,
+    checkedInAt: typeof fields.checkedInAt === "string" ? fields.checkedInAt : undefined,
+  } satisfies UserDailyLog;
 }
 
 async function firestoreRequest<T>(path: string, init?: RequestInit): Promise<T> {
@@ -270,6 +318,40 @@ async function firestoreRequest<T>(path: string, init?: RequestInit): Promise<T>
   }
 
   return json;
+}
+
+async function firestoreRequestOrNull<T>(path: string, init?: RequestInit): Promise<T | null> {
+  const accessToken = await getAccessToken();
+  const response = await fetch(`${FIRESTORE_BASE}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      ...(init?.headers || {}),
+    },
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  const json = (await response.json()) as T & {
+    error?: { message?: string };
+  };
+
+  if (!response.ok) {
+    throw new Error(json.error?.message || `Firestore request failed with status ${response.status}.`);
+  }
+
+  return json;
+}
+
+function buildUpdateMask(fields: string[]): string {
+  const params = new URLSearchParams();
+  for (const field of fields) {
+    params.append("updateMask.fieldPaths", field);
+  }
+  return params.toString();
 }
 
 export async function listUsersReadyForAlarm(nowIso: string): Promise<TriggerableUser[]> {
@@ -332,20 +414,99 @@ export async function listUsersWithAlarmPreferences(): Promise<TriggerableUser[]
     .filter((user) => user.time != null);
 }
 
-export async function updateUserNextAlarmTime(userId: string, nextAlarmTime: string): Promise<void> {
+export async function updateUserFields(
+  userId: string,
+  fields: Record<string, unknown>
+): Promise<void> {
   const { project_id } = getServiceAccount();
-  const params = new URLSearchParams({
-    "updateMask.fieldPaths": "nextAlarmTime",
-  });
+  const entries = Object.entries(fields).filter(([, value]) => value !== undefined);
+  if (entries.length === 0) return;
+
+  const fieldNames = entries.map(([field]) => field);
+  const params = buildUpdateMask(fieldNames);
 
   await firestoreRequest(
-    `/projects/${project_id}/databases/(default)/documents/users/${encodeURIComponent(userId)}?${params.toString()}`,
+    `/projects/${project_id}/databases/(default)/documents/users/${encodeURIComponent(userId)}?${params}`,
     {
       method: "PATCH",
       body: JSON.stringify({
         fields: {
-          nextAlarmTime: encodeFirestoreValue(nextAlarmTime),
+          ...Object.fromEntries(
+            entries.map(([field, value]) => [field, encodeFirestoreValue(value)])
+          ),
         },
+      }),
+    }
+  );
+}
+
+export async function updateUserNextAlarmTime(userId: string, nextAlarmTime: string): Promise<void> {
+  await updateUserFields(userId, { nextAlarmTime });
+}
+
+export async function findUserByPhone(phone: string): Promise<TriggerableUser | null> {
+  const { project_id } = getServiceAccount();
+  const results = await firestoreRequest<
+    Array<{
+      document?: {
+        name: string;
+        fields?: Record<string, Record<string, unknown>>;
+      };
+    }>
+  >(`/projects/${project_id}/databases/(default)/documents:runQuery`, {
+    method: "POST",
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: "users" }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "phone" },
+            op: "EQUAL",
+            value: { stringValue: phone },
+          },
+        },
+        limit: 1,
+      },
+    }),
+  });
+
+  const doc = results.find((row) => row.document?.name)?.document;
+  return doc ? mapTriggerableUser(doc) : null;
+}
+
+export async function getUserDailyLog(
+  userId: string,
+  dateKey: string
+): Promise<UserDailyLog | null> {
+  const { project_id } = getServiceAccount();
+  const doc = await firestoreRequestOrNull<{
+    name: string;
+    fields?: Record<string, Record<string, unknown>>;
+  }>(
+    `/projects/${project_id}/databases/(default)/documents/users/${encodeURIComponent(userId)}/dailyLogs/${encodeURIComponent(dateKey)}`
+  );
+
+  return doc ? mapUserDailyLog(doc) : null;
+}
+
+export async function updateUserDailyLog(
+  userId: string,
+  dateKey: string,
+  fields: Partial<UserDailyLog>
+): Promise<void> {
+  const { project_id } = getServiceAccount();
+  const entries = Object.entries(fields).filter(([, value]) => value !== undefined);
+  if (entries.length === 0) return;
+
+  const params = buildUpdateMask(entries.map(([field]) => field));
+  await firestoreRequest(
+    `/projects/${project_id}/databases/(default)/documents/users/${encodeURIComponent(userId)}/dailyLogs/${encodeURIComponent(dateKey)}?${params}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        fields: Object.fromEntries(
+          entries.map(([field, value]) => [field, encodeFirestoreValue(value)])
+        ),
       }),
     }
   );

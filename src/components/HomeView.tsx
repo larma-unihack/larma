@@ -1,18 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import SceneBackground, { type SkyVariant } from "@/components/SceneBackground";
 import Link from "next/link";
 import Hamburger from "@/components/Hamburger";
 import { useAlarmStatus } from "@/hooks/useAlarmStatus";
 import Dog from "@/components/Dog";
+import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/lib/firebase";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { getLocalDateKey, getNextDayAlarmISO, normalizeTime } from "@/lib/alarm-time";
 // import "../app/global.css";
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
 const IMG_DOG = "/images/dog_sitting.png";
 const IMG_HEART = "/images/heart.gif";
 const IMG_SLEEP = "/images/sleep.gif";
-const IMG_SQUARE = "/images/home_page_square.png";
-const IMG_RECTANGLE = "/images/home_page_rectangle.png";
 
 interface HomeViewProps {
   hasStarted?: boolean;
@@ -38,13 +41,92 @@ function getSkyVariant(health: number | null): SkyVariant {
   return "ultra-dark";
 }
 
+function clampHealth(value: number): number {
+  if (value < 0) return 0;
+  if (value > 100) return 100;
+  return value;
+}
+
 export default function HomeView({ hasStarted = true }: HomeViewProps) {
-  const { alarmSet, alarmTime, phone, loading, health } = useAlarmStatus();
+  const { alarmSet, alarmTime, phone, loading, health, snoozeMinutes } = useAlarmStatus();
+  const { user } = useAuth();
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [checkInMessage, setCheckInMessage] = useState<string | null>(null);
   const showSquareContent = !loading && !alarmSet;
-  const leftPanelImage = loading || !alarmSet ? IMG_SQUARE : IMG_RECTANGLE;
   const showHearts = health != null && health >= 50;
   const showSleep = health != null && health < 50;
   const skyVariant = getSkyVariant(health);
+
+  const handleCheckIn = async () => {
+    if (!user?.uid || !db || isCheckingIn) return;
+
+    setIsCheckingIn(true);
+    setCheckInMessage(null);
+
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      const data = userSnap.data();
+      const timezone =
+        typeof data?.timezone === "string"
+          ? data.timezone
+          : Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const pref = normalizeTime(data?.time, timezone);
+
+      if (!pref) {
+        setCheckInMessage("Set your alarm first.");
+        return;
+      }
+
+      const now = new Date();
+      const nowIso = now.toISOString();
+      const dateKey = getLocalDateKey(now, pref.timezone);
+      const dailyLogRef = doc(db, "users", user.uid, "dailyLogs", dateKey);
+      const dailyLogSnap = await getDoc(dailyLogRef);
+      const dailyLog = dailyLogSnap.data();
+      const snoozeCount =
+        typeof dailyLog?.snoozeCount === "number" ? dailyLog.snoozeCount : 0;
+      const currentHealth =
+        typeof data?.health === "number" ? clampHealth(data.health) : 100;
+      const nextHealth =
+        snoozeCount === 0 ? clampHealth(currentHealth + 10) : currentHealth;
+
+      await setDoc(
+        dailyLogRef,
+        {
+          date: dateKey,
+          timezone: pref.timezone,
+          triggeredCallTimes: Array.isArray(dailyLog?.triggeredCallTimes)
+            ? dailyLog.triggeredCallTimes
+            : [],
+          snoozeTimes: Array.isArray(dailyLog?.snoozeTimes)
+            ? dailyLog.snoozeTimes
+            : [],
+          snoozeCount,
+          checkedInAt: nowIso,
+        },
+        { merge: true }
+      );
+
+      await updateDoc(userRef, {
+        health: nextHealth,
+        nextAlarmTime: getNextDayAlarmISO(
+          pref.hours,
+          pref.minutes,
+          pref.timezone,
+          now
+        ),
+        pendingSnooze: false,
+        pendingSnoozeRequestedAt: null,
+      });
+
+      setCheckInMessage("Checked in.");
+    } catch {
+      setCheckInMessage("Check-in failed.");
+    } finally {
+      setIsCheckingIn(false);
+    }
+  };
 
   return (
     <SceneBackground skyVariant={skyVariant}>
@@ -96,7 +178,7 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               </div>
               <div className="absolute left-[12%] right-[12%] bottom-[10%] flex h-[20%] items-center justify-center text-center bg-white">
                 <p className="max-w-full text-xs font-medium leading-tight text-gray-800 sm:text-2xl md:text-xl">
-                  Snooze: 10 min
+                  Snooze: {snoozeMinutes} min
                 </p>
               </div>
             </div>
@@ -126,11 +208,19 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           </div>
 
           <div className="relative h-[65%] w-full mt-[-5%]">
-            <img
-              alt="Dog"
-              className="relative z-10 size-full object-contain object-bottom"
-              src={IMG_DOG}
-            />
+            <button
+              type="button"
+              onClick={handleCheckIn}
+              disabled={isCheckingIn || !alarmSet || !user}
+              className="relative z-10 size-full disabled:cursor-not-allowed"
+              aria-label="Check in with your dog"
+            >
+              <img
+                alt="Dog"
+                className="relative z-10 size-full object-contain object-bottom"
+                src={IMG_DOG}
+              />
+            </button>
             {showHearts && (
               <div
                 className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center"
@@ -174,6 +264,11 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
                   src={IMG_SLEEP}
                 />
               </div>
+            )}
+            {checkInMessage && (
+              <p className="pointer-events-none absolute bottom-[-10%] left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded bg-white/80 px-2 py-1 text-xs font-bold text-gray-800">
+                {checkInMessage}
+              </p>
             )}
           </div>
         </div>

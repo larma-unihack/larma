@@ -1,37 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { normalizeTime } from "@/lib/alarm-time";
+import { normalizeSnoozeMinutes, normalizeTime } from "@/lib/alarm-time";
 
-export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null; phone: string | null; health: number | null; loading: boolean } {
+export function useAlarmStatus(): {
+  alarmSet: boolean;
+  alarmTime: string | null;
+  phone: string | null;
+  health: number | null;
+  snoozeMinutes: number;
+  loading: boolean;
+} {
   const { user } = useAuth();
   const [alarmSet, setAlarmSet] = useState(false);
   const [alarmTime, setAlarmTime] = useState<string | null>(null);
   const [phone, setPhone] = useState<string | null>(null);
   const [health, setHealth] = useState<number | null>(null);
+  const [snoozeMinutes, setSnoozeMinutes] = useState(5);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const uid = user?.uid;
     const firestore = db;
     if (!uid || !firestore) {
-      setAlarmSet(false);
-      setAlarmTime(null);
-      setPhone(null);
-      setHealth(null);
-      setLoading(false);
+      queueMicrotask(() => {
+        setAlarmSet(false);
+        setAlarmTime(null);
+        setPhone(null);
+        setHealth(null);
+        setSnoozeMinutes(5);
+        setLoading(false);
+      });
       return;
     }
 
-    let cancelled = false;
-
-    async function fetchAlarm() {
-      try {
-        const userDoc = await getDoc(doc(firestore!, "users", uid!));
-        if (cancelled) return;
+    const unsubscribe = onSnapshot(
+      doc(firestore, "users", uid),
+      (userDoc) => {
         const data = userDoc.data();
         const next = data?.nextAlarmTime;
         const tz = typeof data?.timezone === "string" ? data.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -54,22 +62,23 @@ export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null;
         } else {
           setHealth(100);
         }
-      } catch {
-        if (!cancelled) {
-          setAlarmSet(false);
-          setAlarmTime(null);
-          setPhone(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+        setSnoozeMinutes(normalizeSnoozeMinutes(data?.snoozeMinutes));
+        setLoading(false);
+      },
+      () => {
+        setAlarmSet(false);
+        setAlarmTime(null);
+        setPhone(null);
+        setHealth(null);
+        setSnoozeMinutes(5);
+        setLoading(false);
       }
-    }
+    );
 
-    fetchAlarm();
     return () => {
-      cancelled = true;
+      unsubscribe();
     };
   }, [user?.uid]);
 
-  return { alarmSet, alarmTime, phone, health, loading };
+  return { alarmSet, alarmTime, phone, health, snoozeMinutes, loading };
 }

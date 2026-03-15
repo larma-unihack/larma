@@ -4,6 +4,10 @@
  * from that for cron/scheduling.
  */
 
+export const DEFAULT_SNOOZE_MINUTES = 5;
+export const MIN_SNOOZE_MINUTES = 1;
+export const MAX_SNOOZE_MINUTES = 60;
+
 export interface AlarmTimePreference {
   hours: number;
   minutes: number;
@@ -13,6 +17,12 @@ export interface AlarmTimePreference {
 type ZonedTimeParts = {
   hour: number;
   minute: number;
+};
+
+type ZonedDateParts = {
+  year: string;
+  month: string;
+  day: string;
 };
 
 function getZonedTimeParts(date: Date, timezone: string): ZonedTimeParts {
@@ -28,6 +38,23 @@ function getZonedTimeParts(date: Date, timezone: string): ZonedTimeParts {
   return {
     hour: parseInt(part("hour"), 10),
     minute: parseInt(part("minute"), 10),
+  };
+}
+
+function getZonedDateParts(date: Date, timezone: string): ZonedDateParts {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = formatter.formatToParts(date);
+  const part = (k: string) => parts.find((p) => p.type === k)?.value ?? "00";
+
+  return {
+    year: part("year"),
+    month: part("month"),
+    day: part("day"),
   };
 }
 
@@ -64,6 +91,64 @@ export function isCurrentAlarmMinute(
 ): boolean {
   const zoned = getZonedTimeParts(now, timezone);
   return zoned.hour === hours && zoned.minute === minutes;
+}
+
+export function getLocalDateKey(
+  date: Date,
+  timezone: string
+): string {
+  const parts = getZonedDateParts(date, timezone);
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+export function getNextDayAlarmISO(
+  hours: number,
+  minutes: number,
+  timezone: string,
+  after: Date = new Date()
+): string {
+  const stepMs = 60 * 1000;
+  const maxSteps = 3 * 24 * 60;
+  const currentDateKey = getLocalDateKey(after, timezone);
+  let t = Math.floor(after.getTime() / stepMs) * stepMs + stepMs;
+  let nextDateKey: string | null = null;
+
+  for (let i = 0; i < maxSteps; i += 1) {
+    const date = new Date(t);
+    const dateKey = getLocalDateKey(date, timezone);
+    if (dateKey !== currentDateKey) {
+      nextDateKey = dateKey;
+      break;
+    }
+    t += stepMs;
+  }
+
+  if (!nextDateKey) {
+    return new Date(after.getTime() + 24 * 60 * 60 * 1000).toISOString();
+  }
+
+  for (let i = 0; i < maxSteps; i += 1) {
+    const date = new Date(t);
+    const zoned = getZonedTimeParts(date, timezone);
+    const dateKey = getLocalDateKey(date, timezone);
+    if (dateKey === nextDateKey && zoned.hour === hours && zoned.minute === minutes) {
+      return date.toISOString();
+    }
+    t += stepMs;
+  }
+
+  return new Date(after.getTime() + 24 * 60 * 60 * 1000).toISOString();
+}
+
+export function normalizeSnoozeMinutes(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return DEFAULT_SNOOZE_MINUTES;
+  }
+
+  const rounded = Math.round(value);
+  if (rounded < MIN_SNOOZE_MINUTES) return MIN_SNOOZE_MINUTES;
+  if (rounded > MAX_SNOOZE_MINUTES) return MAX_SNOOZE_MINUTES;
+  return rounded;
 }
 
 /**
