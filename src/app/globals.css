@@ -6,6 +6,7 @@
   --foreground: #171717;
   --light-green: #569629;
   --dark-green: #2d4f15;
+  
 }
 
 @theme inline {
@@ -13,6 +14,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-dark-green: var(--dark-green);
+  --color-light-green: var(--light-green);
 }
 
 @media (prefers-color-scheme: dark) {

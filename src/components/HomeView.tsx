@@ -4,6 +4,8 @@ import SceneBackground, { type SkyVariant } from "@/components/SceneBackground";
 import Link from "next/link";
 import Hamburger from "@/components/Hamburger";
 import { useAlarmStatus } from "@/hooks/useAlarmStatus";
+// import "../app/global.css";
+
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
 const IMG_DOG = "/images/dog_sitting.png";
@@ -50,32 +52,31 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
         {hasStarted && <Hamburger />}
 
         <div
-          className="absolute left-[2%] top-[8%] h-[32vh] w-[38vw] sm:left-[3%] sm:top-[9%] sm:h-[35vh] sm:min-h-[180px] sm:w-[36vw] sm:max-w-[240px] md:left-[4%] md:top-[10%] md:h-[40vh] md:min-h-[200px] md:w-[25vw] md:max-w-[260px] lg:max-w-[280px]"
+          className="absolute left-[2%] top-[1%] h-[30vh] w-[38vw] sm:left-[3%] sm:top-[9%] sm:h-[35vh] sm:min-h-[180px] sm:w-[36vw] sm:max-w-[240px] md:left-[4%] md:top-[10%] md:h-[40vh] md:min-h-[200px] md:w-[25vw] md:max-w-[260px] lg:max-w-[280px]"
           aria-hidden
         >
-          <img
-            alt=""
-            className="pointer-events-none absolute inset-0 size-full object-contain"
-            src={leftPanelImage}
-          />
+
           {showSquareContent && (
-            <>
+            <div
+              className="absolute inset-0 size-full object-contain bg-light-green"
+            >
               {/* Top white section */}
               <Link
                 href="/set-alarm-time"
-                className={`absolute left-[14%] right-[14%] top-[12%] flex h-[38%] items-center justify-center text-center ${!hasStarted ? "pointer-events-none" : "cursor-pointer"}`}
+                className={`absolute left-[14%] right-[14%] top-[15%] flex h-[30%] items-center justify-center text-center ${!hasStarted ? "pointer-events-none" : "cursor-pointer"} bg-white`}
               >
-                <p className="max-w-full text-[clamp(0.8rem,2vw,1rem)] font-medium leading-tight text-gray-800 sm:text-[clamp(0.55rem,1.8vw,0.95rem)] md:text-[clamp(0.6rem,1.8vw,1rem)]">
+                <p className="max-w-full text-xs leading-tight text-gray-800 sm:text-xl md:text-md text-wrap">
                   Set Alarm Time
                 </p>
               </Link>
               {/* Bottom white section */}
-              <div className="absolute bottom-[20%] left-[14%] right-[14%] flex h-[38%] items-center justify-center text-center">
-                <p className="max-w-full text-[clamp(0.8rem,1.8vw,0.9rem)] font-medium leading-tight text-gray-800 sm:text-[clamp(0.5rem,1.6vw,0.85rem)] md:text-[clamp(0.55rem,1.6vw,0.9rem)]">
+              <div className=" absolute bottom-[15%] left-[14%] right-[14%] flex h-[30%] items-center justify-center text-center bg-white">
+                <p className="max-w-full text-xs leading-tight text-gray-800 sm:text-lg md:text-md text-wrap">
                   Avg Snoozes: 2
                 </p>
               </div>
-            </>
+              
+            </div>
           )}
           {!loading && alarmSet && (
             <>
@@ -100,15 +101,15 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
               </div>
             </>
           )}
+
         </div>
 
         <div className="absolute bottom-[28%] right-[5%] flex h-[40vh] aspect-[1/1.2] flex-col items-center justify-end md:right-auto md:left-[58%] md:h-[45vh]">
           <div
-            className={`relative w-full h-[40%] transition-all duration-300 ${
-              hasStarted
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4"
-            }`}
+            className={`relative w-full h-[40%] transition-all duration-300 ${hasStarted
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4"
+              }`}
           >
             <div className="relative h-full w-full">
               <img
