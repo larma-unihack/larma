@@ -3,13 +3,12 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginModal } from "@/components/LoginModal";
 import { useRouter } from "next/navigation";
-import Dog from "../components/Dog" 
+import Dog from "../components/Dog";
 
 import { motion } from "motion/react";
 import Link from "next/link";
 import SceneBackground from "@/components/SceneBackground";
 import { useState, useEffect } from "react";
-
 
 const IMG_TREE = "/images/tree.png";
 
@@ -23,26 +22,26 @@ export default function Home() {
 
   return (
     <div
-      className={`opening-page fixed inset-0 flex flex-col items-center justify-center bg-white ${openLoginModal ? "" : "overflow-hidden"
-        }`}
+      className={`opening-page fixed inset-0 flex flex-col items-center justify-center bg-white ${
+        openLoginModal ? "" : "overflow-hidden"
+      }`}
     >
       <div className="opening-page__canvas relative flex-shrink-0 overflow-hidden">
         <SceneBackground>
           <div className="pointer-events-none fixed inset-0 flex flex-col items-center justify-center overflow-hidden bg-transparent">
             <div className="pointer-events-none relative size-full flex-shrink-0 overflow-hidden">
-
-              <Dog x={300} y={460} begin={800} width={200} height={200}/>
-              <Dog x={500} y={460} begin={500} width={200} height={100}/>
-              <Dog x={500} y={555} begin={200} width={80} height={100}/>
-              <Dog x={400} y={550} begin={900} width={100} height={100}/>
-              <Dog x={800} y={500} begin={1300} width={150} height={100}/>
-              <Dog x={700} y={545} begin={700} width={100} height={100}/>
-              <Dog x={900} y={550} begin={1400} width={80} height={100}/>
-              <Dog x={50} y={540} begin={500} width={80} height={100}/>
-              <Dog x={300} y={550} begin={300} width={80} height={100}/>
-              <Dog x={700} y={540} begin={1800} width={80} height={100}/>
-              <Dog x={900} y={430} begin={1200} width={300} height={100}/>
-              <Dog x={900} y={450} begin={1200} width={250} height={100}/>
+              <Dog x={300} y={460} begin={800} width={200} height={200} />
+              <Dog x={500} y={460} begin={500} width={200} height={100} />
+              <Dog x={500} y={555} begin={200} width={80} height={100} />
+              <Dog x={400} y={550} begin={900} width={100} height={100} />
+              <Dog x={800} y={500} begin={1300} width={150} height={100} />
+              <Dog x={700} y={545} begin={700} width={100} height={100} />
+              <Dog x={900} y={550} begin={1400} width={80} height={100} />
+              <Dog x={50} y={540} begin={500} width={80} height={100} />
+              <Dog x={300} y={550} begin={300} width={80} height={100} />
+              <Dog x={700} y={540} begin={1800} width={80} height={100} />
+              <Dog x={900} y={430} begin={1200} width={300} height={100} />
+              <Dog x={900} y={450} begin={1200} width={250} height={100} />
 
               <p className="absolute left-1/2 top-[10.74%] w-full max-w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]">
                 larma
@@ -82,7 +81,6 @@ export default function Home() {
                   <path d="M40 26 L40 74 L74 50 Z" fill={PLAY_TRIANGLE_FILL} />
                 </svg>
               </button>
-
             </div>
           </div>
         </SceneBackground>

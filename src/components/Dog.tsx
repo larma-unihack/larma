@@ -27,7 +27,13 @@ export default function Dog({
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentImage = images[currentIndex];
   const [start, setStart] = useState(0);
-  const [style, setStyle] = useState("absolute inset-0 scale-x-[1] object-top");
+
+  // Set initial flip based on initial direction (begin vs x)
+  const [style, setStyle] = useState(
+    begin > x
+      ? "absolute inset-0 scale-x-[-1] object-top"
+      : "absolute inset-0 scale-x-[1] object-top",
+  );
 
   // State for relative movement
   const [targetValue, setTargetValue] = useState(begin);
@@ -37,13 +43,10 @@ export default function Dog({
   useEffect(() => {
     const timeout = setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
-      if (begin > x && start == 0) {
-        setStyle("absolute inset-0 scale-x-[-1] object-top");
-        setStart(1);
-      }
+      // Removed conflicting direction logic here to stop moonwalking
     }, 100);
     return () => clearTimeout(timeout);
-  }, [currentIndex, start, begin, x]);
+  }, [currentIndex]);
 
   // Movement Logic (Relative Wandering)
   useEffect(() => {
@@ -75,7 +78,7 @@ export default function Dog({
   return (
     <motion.div
       initial={{
-        y: "63vh",
+        y: `${y / 8.5}vh`,
         x: `${x}px`,
       }}
       animate={{
