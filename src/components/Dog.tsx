@@ -33,7 +33,7 @@ export default function Dog({
   const [targetValue, setTargetValue] = useState(begin);
   const [yValue, setYValue] = useState(y);
 
-  // 1. Sprite Animation
+  // Sprite Animation
   useEffect(() => {
     const timeout = setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
@@ -45,7 +45,7 @@ export default function Dog({
     return () => clearTimeout(timeout);
   }, [currentIndex, start, begin, x]);
 
-  // 2. Movement Logic (Relative Wandering)
+  // Movement Logic (Relative Wandering)
   useEffect(() => {
     const timeout = setTimeout(() => {
       // Use window width to calculate a relative target in pixels
@@ -75,21 +75,16 @@ export default function Dog({
   return (
     <motion.div
       initial={{
-        y: "63vh", // Starts 70% down (30% up from bottom)
+        y: "63vh",
         x: `${x}px`,
       }}
       animate={{
-        // Uses vh for position to stay relative to screen height
-        // Dividing yValue by a larger number like 8 or 9
-        // will keep them in that lower 30% zone.
         y: `${yValue / 8.5}vh`,
         x: `${targetValue}px`,
         zIndex: Math.round(yValue),
       }}
       transition={{ duration: 10, ease: "linear" }}
       style={{
-        // Changed from vw to vh so size only changes with view height
-        // Using a multiplier like 0.15vh to make them slightly larger
         width: `${width * 0.1}vh`,
         height: "auto",
         position: "absolute",

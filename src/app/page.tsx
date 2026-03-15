@@ -44,10 +44,6 @@ export default function Home() {
               <Dog x={900} y={430} begin={1200} width={300} height={100}/>
               <Dog x={900} y={450} begin={1200} width={250} height={100}/>
 
-
-
-
-
               <p className="absolute left-1/2 top-[10.74%] w-full max-w-full -translate-x-1/2 whitespace-nowrap text-center font-[family-name:var(--font-irish-grover)] text-[22vw] leading-none not-italic text-black sm:text-[18vw] md:text-[clamp(80px,13vw,256px)]">
                 larma
               </p>
