@@ -51,7 +51,7 @@ export default function CallForm() {
           </label>
           <input
             type="tel"
-            placeholder="+1 555 123 4567"
+            placeholder="+61 412 345 678"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full border p-2 rounded-md focus:ring-2 focus:ring-blue-500 outline-none mt-1"

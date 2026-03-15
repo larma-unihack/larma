@@ -123,7 +123,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
-                placeholder="+1 555 123 4567"
+                placeholder="+61 412 345 678"
                 className="input input-bordered w-full"
                 autoComplete="tel"
               />
