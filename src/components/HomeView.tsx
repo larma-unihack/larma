@@ -79,27 +79,29 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
             </div>
           )}
           {!loading && alarmSet && (
-            <>
+            <div
+              className="absolute inset-0 size-full object-contain bg-light-green"
+            >
               <Link
                 href="/set-alarm-time"
-                className="absolute left-[12%] right-[12%] top-[23%] flex h-[22%] items-center justify-center text-center cursor-pointer hover:opacity-90"
+                className="absolute left-[12%] right-[12%] top-[10%] flex h-[20%] items-center justify-center text-center cursor-pointer hover:opacity-90 bg-white"
                 aria-label="Change alarm time"
               >
-                <p className="max-w-full text-[clamp(0.8rem,1.8vw,0.9rem)] font-medium leading-tight text-gray-800 font-bold sm:text-[clamp(0.5rem,1.6vw,0.85rem)] md:text-[clamp(0.55rem,1.6vw,0.9rem)] line-clamp-2">
+                <p className="max-w-full  text-xs font-medium leading-tight text-gray-800 font-bold sm:text-2xl md:text-lg line-clamp-xl">
                   Alarm Time: {formatAlarmTime(alarmTime)}
                 </p>
               </Link>
-              <div className="absolute left-[12%] right-[12%] top-[40%] flex h-[22%] items-center justify-center text-center">
-                <p className="max-w-full truncate text-[clamp(0.8rem,1.8vw,0.9rem)] font-medium leading-tight font-bold text-gray-800 sm:text-[clamp(0.5rem,1.6vw,0.85rem)] md:text-[clamp(0.55rem,1.6vw,0.9rem)]" title={phone ?? undefined}>
+              <div className="absolute left-[12%] right-[12%] top-[40%] flex h-[20%] items-center justify-center text-center bg-white">
+                <p className="max-w-full truncate text-xs text-wrap font-medium leading-tight font-bold text-gray-800 sm:text-2xl md:text-xl" title={phone ?? undefined}  >
                   Phone: {phone ?? "—"}
                 </p>
               </div>
-              <div className="absolute left-[12%] right-[12%] bottom-[23%] flex h-[22%] items-center justify-center text-center">
-                <p className="max-w-full text-[clamp(0.8rem,1.8vw,1.2rem)] font-medium leading-tight text-gray-800 sm:text-[clamp(0.5rem,1.6vw,0.85rem)] md:text-[clamp(0.55rem,1.6vw,0.9rem)]">
+              <div className="absolute left-[12%] right-[12%] bottom-[10%] flex h-[20%] items-center justify-center text-center bg-white">
+                <p className="max-w-full text-xs font-medium leading-tight text-gray-800 sm:text-2xl md:text-xl">
                   Snooze: 10 min
                 </p>
               </div>
-            </>
+            </div>
           )}
 
         </div>
