@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
+import { getNextAlarmISO, normalizeTime } from "@/lib/alarm-time";
 
 export async function POST(request: Request) {
     try {
@@ -48,18 +49,15 @@ export async function POST(request: Request) {
                 }
             }
 
-            // Calculate next alarm time incrementally (+24 hours from the *current* nextAlarmTime to avoid drifting)
-            // or simply +24 hours from now if it drifted significantly.
-            const currentAlarmTime = new Date(data.nextAlarmTime || nowIso);
-            const nextAlarm = new Date(currentAlarmTime.getTime() + 24 * 60 * 60 * 1000);
-
-            // Safety measure: if the calculated next alarm is still in the past, push it to tomorrow
-            if (nextAlarm.getTime() <= new Date().getTime()) {
-                nextAlarm.setTime(new Date().getTime() + 24 * 60 * 60 * 1000);
-            }
+            // Reschedule from user's preferred time + timezone so we stay consistent with DB.
+            const tz = typeof data.timezone === "string" ? data.timezone : "UTC";
+            const pref = normalizeTime(data.time, tz);
+            const nextAlarmTime = pref
+                ? getNextAlarmISO(pref.hours, pref.minutes, pref.timezone, new Date())
+                : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
             await adminDb.collection("users").doc(userDoc.id).update({
-                nextAlarmTime: nextAlarm.toISOString(),
+                nextAlarmTime,
             });
         }
 

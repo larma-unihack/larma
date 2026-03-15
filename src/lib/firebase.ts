@@ -2,6 +2,10 @@ import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
+// NEXT_PUBLIC_* are inlined at BUILD time by Next.js. They must be set in the
+// environment when you run the build (e.g. .env.local for local deploy, or
+// CI/Cloudflare Pages build env for remote deploy). Dashboard/runtime vars
+// alone do not affect the client bundle.
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

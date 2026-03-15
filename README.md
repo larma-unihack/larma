@@ -29,6 +29,17 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Deploy on Cloudflare Workers
+
+```bash
+npm run deploy
+```
+
+**Firebase auth on Workers:** The app uses `NEXT_PUBLIC_FIREBASE_*` env vars. Next.js inlines these at **build time**, not at runtime. So:
+
+- **Local deploy:** Run `npm run deploy` from the repo root so that `.env.local` is loaded during the build.
+- **CI deploy:** Export or inject all `NEXT_PUBLIC_FIREBASE_*` (see `.env.example`) into the build step’s environment. Cloudflare dashboard / Worker env vars do not affect the client bundle.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

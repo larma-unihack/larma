@@ -16,14 +16,17 @@ interface HomeViewProps {
   hasStarted?: boolean;
 }
 
-function formatAlarmTime(isoString: string | null): string {
-  if (!isoString) return "—";
-  try {
-    const d = new Date(isoString);
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return "—";
+function formatAlarmTime(alarmTime: string | null): string {
+  if (!alarmTime) return "—";
+  if (alarmTime.includes("T")) {
+    try {
+      const d = new Date(alarmTime);
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch {
+      return "—";
+    }
   }
+  return alarmTime;
 }
 
 function getSkyVariant(health: number | null): SkyVariant {
