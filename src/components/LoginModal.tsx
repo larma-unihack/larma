@@ -24,7 +24,9 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth) {
-      setError("Auth is not configured");
+      setError(
+        "Auth is not configured. Set NEXT_PUBLIC_FIREBASE_* in the build environment (e.g. .env.local or CI env)."
+      );
       return;
     }
     setError(null);

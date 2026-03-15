@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SceneBackground from "@/components/SceneBackground";
 import Hamburger from "@/components/Hamburger";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { getNextAlarmISO, normalizeTime } from "@/lib/alarm-time";
 
 const SPEECH_BUBBLE = "/images/speech_bubble.png";
 const IMG_DOG = "/images/dog_sitting.png";
@@ -26,14 +27,30 @@ function parseTimeInput(value: string): { hours: number; minutes: number } | nul
   return { hours: h, minutes: m };
 }
 
+const DEFAULT_TIME = { hours: 9, minutes: 26 };
+
 export default function SetAlarmTimePage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [time, setTime] = useState({ hours: 9, minutes: 26 });
+  const [time, setTime] = useState(DEFAULT_TIME);
+  const [timeLoaded, setTimeLoaded] = useState(false);
   const { hours, minutes } = time;
   const [inputValue, setInputValue] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!user?.uid || !db) return;
+    getDoc(doc(db, "users", user.uid))
+      .then((snap) => {
+        const data = snap.data();
+        const tz = typeof data?.timezone === "string" ? data.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const pref = normalizeTime(data?.time, tz);
+        if (pref) setTime({ hours: pref.hours, minutes: pref.minutes });
+      })
+      .catch(() => {})
+      .finally(() => setTimeLoaded(true));
+  }, [user?.uid]);
 
   const displayValue = isInputFocused ? inputValue : formatTime(hours, minutes);
 
@@ -90,16 +107,12 @@ export default function SetAlarmTimePage() {
       }
       const phone = userDoc.data().phone;
 
-      const now = new Date();
-      const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
-      if (targetDate.getTime() <= now.getTime()) {
-        targetDate.setDate(targetDate.getDate() + 1);
-      }
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const nextAlarmTime = getNextAlarmISO(hours, minutes, timezone);
 
       await updateDoc(doc(db, "users", user.uid), {
-        time: { hours, minutes },
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        nextAlarmTime: targetDate.toISOString()
+        time: { hours, minutes, timezone },
+        nextAlarmTime,
       });
 
       router.push("/home-page");

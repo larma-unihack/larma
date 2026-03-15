@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
+import { normalizeTime } from "@/lib/alarm-time";
 
 export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null; phone: string | null; health: number | null; loading: boolean } {
   const { user } = useAuth();
@@ -32,9 +33,18 @@ export function useAlarmStatus(): { alarmSet: boolean; alarmTime: string | null;
         const userDoc = await getDoc(doc(firestore!, "users", uid!));
         if (cancelled) return;
         const data = userDoc.data();
-        const time = data?.alarmTime ?? null;
-        setAlarmSet(Boolean(time));
-        setAlarmTime(typeof time === "string" ? time : null);
+        const next = data?.nextAlarmTime;
+        const tz = typeof data?.timezone === "string" ? data.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const pref = normalizeTime(data?.time, tz);
+        const hasAlarm = Boolean(next ?? pref);
+        setAlarmSet(hasAlarm);
+        if (typeof next === "string") {
+          setAlarmTime(next);
+        } else if (pref) {
+          setAlarmTime(`${pref.hours.toString().padStart(2, "0")}:${pref.minutes.toString().padStart(2, "0")}`);
+        } else {
+          setAlarmTime(null);
+        }
         setPhone(typeof data?.phone === "string" ? data.phone : null);
         const healthVal = data?.health;
         if (typeof healthVal === "number" && healthVal >= 0 && healthVal <= 100) {
