@@ -55,7 +55,6 @@ export default function HomeView({ hasStarted = true }: HomeViewProps) {
           className="absolute left-[2%] top-[1%] h-[30vh] w-[38vw] sm:left-[3%] sm:top-[9%] sm:h-[35vh] sm:min-h-[180px] sm:w-[36vw] sm:max-w-[240px] md:left-[4%] md:top-[10%] md:h-[40vh] md:min-h-[200px] md:w-[25vw] md:max-w-[260px] lg:max-w-[280px]"
           aria-hidden
         >
-          <Dog x={800} y={400} begin={1000} width={300} height={150} />
 
           {showSquareContent && (
             <div className="absolute inset-0 size-full object-contain bg-light-green">
